@@ -204,8 +204,8 @@ def extractMelSpectrogram_features(folder,raw,melFolder, types):
                 S_DB = S_DB.flatten()[:1200]
                 pickle.dump(S_DB,open(folder+melFolder+"/"+nametype+"/"+_wav.replace(".wav",".mel"),"wb"))
                 
-folder = os.environ["ROOT_DATA_PATH"]
-types = os.listdir(folder+"genres_original")
+folder = os.environ["INPUT_DATA_PATH"]
+types = os.listdir(folder+"/genres_original")
 extractMelSpectrogram_features(folder, "genres_original", "melspectrograms_original", types)
 
 
