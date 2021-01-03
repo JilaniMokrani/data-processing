@@ -214,12 +214,78 @@ for type in types:
     snr_data = pickle.load(open(file_snr, 'rb'))
     
     #"SNR"
-    print ("SNR of "+type+"...")
-    getHIST(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'PCG data')
-    getHIST_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
-    getRug_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
-    PlotScatter(snr_data, type, "red", FiguresPath + "/" + type, "PCG sample", "Signal to Noise Ratio")
+    #print ("SNR of "+type+"...")
+    #getHIST(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'PCG data')
+    #getHIST_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
+    #getRug_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
+    #PlotScatter(snr_data, type, "red", FiguresPath + "/" + type, "PCG sample", "Signal to Noise Ratio")
 
 
 extractMelSpectrogram_features(folder, MelSpectrogramPath, SpectresPath, types)
 
+#Split 3 folds
+from glob import glob
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+import os
+# importing shutil module  
+import shutil
+
+MelSpectrogramFoldsPath = output + "/MelSpectrogramFolds"
+ImageMelSpectrogramFoldsPath = output + "/ImageMelSpectrogramFolds"
+
+kf = KFold(4)
+for nametype in types:
+    fileList = np.array(glob(MelSpectrogramPath+'/'+nametype+'/*.mel'))
+    kf.get_n_splits(fileList)
+    i=1
+    for train_index, test_index in kf.split(fileList):
+        train = fileList[train_index]
+        print(train)
+        test = fileList[test_index]
+        if not os.path.exists(MelSpectrogramFoldsPath):
+            os.mkdir(MelSpectrogramFoldsPath)
+        if not os.path.exists(MelSpectrogramFoldsPath + "/Fold" + str(i)):
+            os.mkdir(MelSpectrogramFoldsPath + "/Fold" + str(i))
+        if not os.path.exists(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/test"):
+            os.mkdir(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/test")
+        if not os.path.exists(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype):
+            os.mkdir(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype)
+        if not os.path.exists(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/train"):
+            os.mkdir(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/train")
+        if not os.path.exists(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype):
+            os.mkdir(MelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype)
+        for file in train:
+            dest = shutil.copy(file,MelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype)
+        for file in test:
+            dest = shutil.copy(file,MelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype)
+        i+=1
+
+for nametype in types:
+    fileList = np.array(glob(SpectresPath+'/'+nametype+'/*.png'))
+    kf.get_n_splits(fileList)
+    i=1
+    for train_index, test_index in kf.split(fileList):
+        train = fileList[train_index]
+        print(train)
+        test = fileList[test_index]
+        if not os.path.exists(ImageMelSpectrogramFoldsPath):
+            os.mkdir(ImageMelSpectrogramFoldsPath)
+        if not os.path.exists(ImageMelSpectrogramFoldsPath + "/Fold" + str(i)):
+            os.mkdir(ImageMelSpectrogramFoldsPath + "/Fold" + str(i))
+        if not os.path.exists(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/test"):
+            os.mkdir(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/test")
+        if not os.path.exists(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype):
+            os.mkdir(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype)
+        if not os.path.exists(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/train"):
+            os.mkdir(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/train")
+        if not os.path.exists(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype):
+            os.mkdir(ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype)
+        for file in train:
+            dest = shutil.copy(file,ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/train/" + nametype)
+        for file in test:
+            dest = shutil.copy(file,ImageMelSpectrogramFoldsPath + "/Fold" + str(i) + "/test/" + nametype)
+        i+=1
