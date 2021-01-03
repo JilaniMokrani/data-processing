@@ -57,27 +57,27 @@ def snr(name):
             print ("- "+_wav+" : "+str(res))
     return snr_data
 
-def getSNR(folder, file_name, types):
+def getSNR(folder,output, types):
     for type in types:
         #- Signal to Noise ratio
-        snr_data = snr(folder+type)
-        pickle.dump(snr_data, open(folder+type+"/snr.data", 'wb')) 
-        snr_data = pickle.load(open(folder+type+"/snr.data", 'rb'))
+        snr_data = snr(folder+"/"+type)
+        pickle.dump(snr_data, open(output+"/"+type+"/snr.data", 'wb')) 
+        snr_data = pickle.load(open(output+"/"+type+"/snr.data", 'rb'))
 
 
 # In[34]:
 
 
-def getHIST(data, type, dataset_type, x_txt, y_txt):
+def getHIST(data, type, imagePath, x_txt, y_txt):
     # matplotlib histogram
     plt.hist(data, edgecolor = 'black',bins = int(180/binwidth))
     # Add labels
-    plt.title('Histogram of ourdataset '+dataset_type+' dataset: '+type+' class, total='+str(len(data)))
+    plt.title('Histogram of '+type+' class, total='+str(len(data)))
     plt.xlabel(x_txt)
     plt.ylabel(y_txt)
-    plt.savefig('Figures/Histogram of ourdataset '+dataset_type+' dataset: '+type+".png")
+    plt.savefig(imagePath+'/Histogram of '+type+".png")
     plt.show()
-def getHIST_KDE(data, type, dataset_type, x_txt, y_txt):
+def getHIST_KDE(data, type, imagePath, x_txt, y_txt):
     # Density Plot and Histogram of all arrival delays
     sns.distplot(
         data, 
@@ -93,12 +93,12 @@ def getHIST_KDE(data, type, dataset_type, x_txt, y_txt):
         #kde_kws={'linewidth': 4}
         )
     # Add labels
-    plt.title('Histogram of ourdataset '+dataset_type+' dataset: '+type+' class, total='+str(len(data)))
+    plt.title('Histogram of '+type+' class, total='+str(len(data)))
     plt.xlabel(x_txt)
     plt.ylabel(y_txt)
-    plt.savefig('Figures/Histogram of ourdataset '+dataset_type+' dataset: '+type+".png")
+    plt.savefig(imagePath+'/Histogram_KDE of '+type+".png")
     plt.show()
-def getRug_KDE(data, type, dataset_type, x_txt, y_txt):
+def getRug_KDE(data, type, imagePath, x_txt, y_txt):
     # Density Plot with Rug Plot
     sns.distplot(
         data, 
@@ -109,48 +109,28 @@ def getRug_KDE(data, type, dataset_type, x_txt, y_txt):
         kde_kws={'linewidth': 3, "label": "KDE"},
         rug_kws={'color': 'black'})
     # Add labels
-    plt.title('Density plot of ourdataset '+dataset_type+' dataset: '+type+' class, total='+str(len(data)))
+    plt.title('Density plot of '+type+' class, total='+str(len(data)))
     plt.xlabel(x_txt)
     plt.ylabel(y_txt)
-    plt.savefig('Figures/Density plot of ourdataset '+dataset_type+' dataset: '+type+".png")
+    plt.savefig(imagePath+'/Density plot of '+type+".png")
     plt.show()
 
-def PlotScatter(data, type, color_type, dataset_type, x_txt, y_txt):
+def PlotScatter(data, type, color_type, imagePath, x_txt, y_txt):
     plt.scatter(
         np.arange(len(data)), 
         data, 
         alpha=0.5, 
         color = color_type, 
         label="PCG Sample: "+type+" class")
-    plt.title('PCG sample plot of ourdataset '+dataset_type+' dataset: '+type+' class, total='+str(len(data)))
+    plt.title('PCG sample plot of '+type+' class, total='+str(len(data)))
     plt.xlabel(x_txt)
     plt.ylabel(y_txt)
-    plt.savefig('Figures/PCG sample plot of ourdataset '+dataset_type+' dataset: '+type+".png")
+    plt.savefig(imagePath+'/PCG sample plot of '+type+".png")
     plt.show()
 
 
 # In[35]:
 
-
-
-folder = os.environ["ROOT_DATA_PATH"]
-types = os.listdir(folder)
-file_name = "_train"
-
-#getSNR(folder, file_name, types)
-
-dataset_type = ""
-binwidth = 5
-for type in types:
-    file_snr = folder+'/'+type+"/snr.data"
-    snr_data = pickle.load(open(file_snr, 'rb'))
-    
-    #"SNR"
-    print ("SNR...")
-    getHIST(snr_data, type, dataset_type, 'Signal to Noise Ratio', 'PCG data')
-    getHIST_KDE(snr_data, type, dataset_type, 'Signal to Noise Ratio', 'Density')
-    getRug_KDE(snr_data, type, dataset_type, 'Signal to Noise Ratio', 'Density')
-    PlotScatter(snr_data, type, "red", dataset_type, "PCG sample", "Signal to Noise Ratio")
 
 
 # In[49]:
@@ -178,39 +158,68 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import confusion_matrix
 from pycm import *
 
-def extractMelSpectrogram_features(folder,raw,melFolder, types):
+def extractMelSpectrogram_features(folder,melFolder,SpectreFolder, types):
     hop_length = 512
-    n_fft = 2048
-    n_mels = 128
+    n_fft = 1024
     for nametype in types:
-        os.mkdir(folder+melFolder+"/"+nametype)
         _wavs = []
         wavs_duration = []
-        for (_,_,filenames) in walk(folder+raw+"/"+nametype+"/"):
+        for (_,_,filenames) in walk(folder+"/"+nametype+"/"):
             _wavs.extend(filenames)
             break
         Mel_Spectrogram = []
         for _wav in _wavs:
             # read audio samples
-            if(".wav" in _wav): 
-                file = folder+raw+"/" +nametype+"/"+_wav
-                print ("-"+file)
+            if(".wav" in _wav and not os.path.exists(SpectreFolder + "/" + nametype + "/" + _wav.replace(".wav",".png"))): 
+                file = folder+"/" +nametype+"/"+_wav
                 signal, rate = librosa.load(file)  
                 #The Mel Spectrogram
                 S = librosa.feature.melspectrogram(signal, sr=rate, n_fft=n_fft, hop_length=hop_length)
                 S_DB = librosa.power_to_db(S, ref=np.max)
                 #Mel_Spectrogram.append(S_DB)
                 #print (S_DB)
-                S_DB = S_DB.flatten()[:1200]
-                pickle.dump(S_DB,open(folder+melFolder+"/"+nametype+"/"+_wav.replace(".wav",".mel"),"wb"))
+                librosa.display.specshow(S_DB, sr=rate, hop_length=hop_length)
+                print(nametype + "/" +  _wav)
+                plt.savefig(SpectreFolder + "/" + nametype + "/" + _wav.replace(".wav",".png") )
+                pickle.dump(S_DB,open(melFolder+"/"+nametype+"/"+_wav.replace(".wav",".mel"),"wb"))
                 
 folder = os.environ["INPUT_DATA_PATH"]
-types = os.listdir(folder+"/genres_original")
-extractMelSpectrogram_features(folder, "genres_original", "melspectrograms_original", types)
+output = os.environ["OUTPUT_DATA_PATH"]
+types = os.listdir(folder)
+
+FiguresPath = output + "/Figures"
+if not os.path.exists(FiguresPath):
+    os.mkdir(FiguresPath)
+    for type in types:
+        os.mkdir(FiguresPath + "/" + type)
+
+MelSpectrogramPath = output + "/MelSpectrograms"
+if not os.path.exists(MelSpectrogramPath):
+    os.mkdir(MelSpectrogramPath)
+    for type in types:
+        os.mkdir(MelSpectrogramPath + "/" + type)
+
+SpectresPath = output + "/Spectres"
+if not os.path.exists(SpectresPath):
+    os.mkdir(SpectresPath)
+    for type in types:
+        os.mkdir(SpectresPath + "/" + type)
+
+getSNR(folder=folder,output = FiguresPath, types = types)
+
+dataset_type = ""
+binwidth = 5
+for type in types:
+    file_snr = FiguresPath+'/'+type+"/snr.data"
+    snr_data = pickle.load(open(file_snr, 'rb'))
+    
+    #"SNR"
+    print ("SNR of "+type+"...")
+    getHIST(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'PCG data')
+    getHIST_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
+    getRug_KDE(snr_data, type, FiguresPath + "/" + type, 'Signal to Noise Ratio', 'Density')
+    PlotScatter(snr_data, type, "red", FiguresPath + "/" + type, "PCG sample", "Signal to Noise Ratio")
 
 
-# In[ ]:
-
-
-
+extractMelSpectrogram_features(folder, MelSpectrogramPath, SpectresPath, types)
 

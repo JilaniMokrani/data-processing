@@ -1,10 +1,10 @@
-FROM ubuntu
+FROM python:3.6
 LABEL MAINTAINER="Jilani Mokrani" 
 RUN apt update -y
-RUN apt upgrade -y
 RUN apt install -y libsndfile1
 RUN apt install -y python3-pip
 RUN pip3 install librosa seaborn pycm==0.8.1
-COPY main.py .
 ENV INPUT_DATA_PATH=/data
-CMD python3 main.py
+ENV OUTPUT_DATA_PATH=/output
+COPY main.py .
+CMD python3 main.py && bash
