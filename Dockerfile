@@ -1,5 +1,4 @@
 FROM python:3.6
-USER 
 LABEL MAINTAINER="Jilani Mokrani" 
 RUN apt update -y
 RUN apt install -y libsndfile1 python3-pip
