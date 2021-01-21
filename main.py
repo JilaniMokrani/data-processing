@@ -167,6 +167,7 @@ def extractMelSpectrogram_features(folder,melFolder,SpectreFolder, types):
 folder = os.environ["INPUT_DATA_PATH"]
 output = os.environ["OUTPUT_DATA_PATH"]
 types = os.listdir(folder)
+print (types)
 
 FiguresPath = output + "/Figures"
 if not os.path.exists(FiguresPath):
