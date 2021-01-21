@@ -10,6 +10,8 @@ import os.path
 from os import walk
 from scipy import stats
 import numpy as np
+import os 
+os.environ[ 'NUMBA_CACHE_DIR' ] = '/tmp/'
 import librosa 
 import numpy as np
 from scipy.stats import norm
