@@ -191,7 +191,6 @@ types = os.listdir(folder)
 
 FiguresPath = output + "/Figures"
 if not os.path.exists(FiguresPath):
-    system("su root")
     os.mkdir(FiguresPath)
     for type in types:
         os.mkdir(FiguresPath + "/" + type)
