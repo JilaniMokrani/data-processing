@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
 
 import scipy.io.wavfile as wavfile
 import numpy
@@ -21,10 +16,6 @@ import matplotlib.pyplot as plt
 # Import the libraries
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-
-# In[26]:
-
 
 def signaltonoise(a, axis=0, ddof=0):
     a = np.asanyarray(a)
@@ -65,10 +56,6 @@ def getSNR(folder,output, types):
         snr_data = snr(folder+"/"+type)
         pickle.dump(snr_data, open(output+"/"+type+"/snr.data", 'wb')) 
         snr_data = pickle.load(open(output+"/"+type+"/snr.data", 'rb'))
-
-
-# In[34]:
-
 
 def getHIST(data, type, imagePath, x_txt, y_txt):
     # matplotlib histogram
@@ -129,14 +116,6 @@ def PlotScatter(data, type, color_type, imagePath, x_txt, y_txt):
     plt.ylabel(y_txt)
     plt.savefig(imagePath+'/PCG sample plot of '+type+".png")
     plt.show()
-
-
-# In[35]:
-
-
-
-# In[49]:
-
 
 import librosa.display
 import scipy.io.wavfile as wavfile
